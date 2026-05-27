@@ -5,8 +5,8 @@ unit Unit1;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, SerialPort,
-  typinfo;
+  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
+  SerialPort, typinfo;
 
 type
 
@@ -15,11 +15,17 @@ type
   TForm1 = class(TForm)
     Button1: TButton;
     Button2: TButton;
+    Button3: TButton;
+    Button4: TButton;
     ListBox1: TListBox;
     Memo1: TMemo;
     SerialPortDriver1: TSerialPortDriver;
+    Splitter1: TSplitter;
     procedure Button1Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
+    procedure Button3Click(Sender: TObject);
+    procedure Button4Click(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
   private
 
   public
@@ -134,6 +140,75 @@ end;
 procedure TForm1.Button2Click(Sender: TObject);
 begin
   ListComponentProperties(Button1, ListBox1.Items);
+end;
+
+procedure TForm1.Button3Click(Sender: TObject);
+begin
+  showmessage('Test');
+end;
+
+procedure TForm1.Button4Click(Sender: TObject);
+var
+  TestButton:TButton;
+  c: TComponent;
+  dd: TControl;
+  FoundClass: TPersistentClass;
+begin
+  FoundClass := FindClass('TButton');
+  if (FoundClass = nil) then begin showmessage('FoundClass = nil'); exit; end;
+
+  if (FoundClass <> nil) then
+  begin
+    if not FoundClass.InheritsFrom(TControl) then begin showmessage('FoundClass not InheritsFrom'); exit; end;
+
+  end;
+
+  c := findcomponent('TestButton');
+  if Not (c=nil) then
+  begin
+    showmessage('Found findcomponent:'+c.ClassName);
+    if (c is TButton) then dd:= TControlClass(FoundClass).Create(self);
+    if (c is TEdit) then dd:= TEdit(c);
+    if (c is TLabel) then dd:= TLabel(c);
+    if (c is TMemo) then dd:= TMemo(c);
+    dd.Free;
+  end;
+
+  TestButton:=TButton.Create(self);
+  TestButton.Name:='TestButton';
+
+  c := findcomponent(TestButton.Name);
+
+  if c=nil then begin showmessage('TComponent = nil'); exit; end;
+  if (c is TButton) then
+  begin
+    //dd:= TButton(c);
+    dd:= TControlClass(FoundClass).Create(self);
+    showmessage('TComponent = TestButton');
+    showmessage(dd.Name);
+    dd.Left:=Button3.Left;
+    dd.Width:=Button3.Width;
+    dd.Height:=Button3.Height;
+    dd.Top:=Button3.Top+Button3.Height+3;
+    dd.Caption:='Copy Button';
+    dd.OnClick:=@Button3Click;
+    dd.Parent:=form1;
+    dd.Visible:=true;
+
+  end;
+  TestButton.Free;
+end;
+
+procedure TForm1.FormCreate(Sender: TObject);
+
+begin
+  RegisterClass(TLabel);
+  RegisterClass(TEdit);
+  RegisterClass(TButton);
+  RegisterClass(TRadioButton);
+  RegisterClass(TCheckbox);
+  RegisterClass(TMemo);
+  Button3.OnClick:=@Button3Click;
 end;
 
 end.
